@@ -1,15 +1,8 @@
-import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { useTheme } from '../context/ThemeContext';
 import { FiMoon, FiSun, FiHeart, FiGift, FiCamera, FiArrowDown, FiMusic } from 'react-icons/fi';
-
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { useRef } from 'react';
 
 const features = [
   {
@@ -39,113 +32,127 @@ const features = [
 ];
 
 export default function Home() {
-  const { theme, toggleTheme } = useTheme();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const { theme, toggleTheme } = useTheme()
+  const featuresRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll();
-  
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  const heartVariants = {
+    float: {
+      y: [0, -20, 0],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    }
+  };
+
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   const textY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Animate hero section elements
-      gsap.from(textRef.current?.querySelectorAll('.animate-text'), {
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
-        ease: 'power4.out',
-      });
-
-      // Animate features
-      gsap.from('.feature-card', {
-        scrollTrigger: {
-          trigger: featuresRef.current,
-          start: 'top center',
-          end: 'bottom center',
-          toggleActions: 'play none none reverse',
-        },
-        y: 100,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: 'power3.out',
-      });
-    });
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-slate-900 transition-colors duration-500">
-      {/* Theme Toggle */}
+    <div className={`min-h-screen ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white' 
+        : 'bg-gradient-to-br from-pink-100 via-red-100 to-purple-100'
+    } relative overflow-hidden`}>
+      {/* Theme Toggle Button */}
       <motion.button
         onClick={toggleTheme}
-        className="fixed top-6 right-6 p-4 rounded-full bg-white/10 backdrop-blur-lg dark:bg-black/20 text-gray-800 dark:text-white z-50"
         whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed top-4 right-4 z-50 p-3 rounded-full bg-white/10 backdrop-blur-lg border border-white/20"
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={theme}
-            initial={{ rotate: -180, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            exit={{ rotate: 180, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {theme === 'light' ? <FiMoon size={24} /> : <FiSun size={24} />}
-          </motion.div>
-        </AnimatePresence>
+        {theme === 'dark' ? <FiMoon size={24} /> : <FiSun size={24} />}
       </motion.button>
 
-      {/* Hero Section */}
-      <div ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Floating Hearts */}
+      {Array.from({ length: 20 }).map((_, i) => (
         <motion.div
-          style={{ y: backgroundY }}
-          className="absolute inset-0 z-0"
+          key={i}
+          initial={{
+            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+            scale: Math.random() * 0.5 + 0.5,
+            opacity: 0.6
+          }}
+          animate="float"
+          variants={heartVariants}
+          style={{
+            position: 'absolute',
+            fontSize: '2rem',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-purple-500/20 dark:from-pink-500/10 dark:to-purple-500/10 backdrop-blur-3xl" />
+          <FiHeart size={48} />
         </motion.div>
+      ))}
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="container mx-auto px-4 py-16 relative flex flex-col items-center justify-center min-h-screen"
+      >
+        <motion.h1
+          variants={itemVariants}
+          className="text-6xl md:text-8xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500"
+        >
+          Will You...?
+        </motion.h1>
+
+        <motion.p
+          variants={itemVariants}
+          className={`text-xl md:text-2xl text-center mb-12 ${
+            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          } max-w-2xl`}
+        >
+          Create beautiful, personalized messages for your special someone. Choose from various scenarios or create your own unique message.
+        </motion.p>
 
         <motion.div
-          ref={textRef}
-          style={{ y: textY }}
-          className="relative z-10 text-center px-4 max-w-5xl mx-auto"
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row gap-4"
         >
-          <motion.h1 
-            className="animate-text text-6xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 mb-6"
-          >
-            Will You?
-          </motion.h1>
-          <motion.p 
-            className="animate-text text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-12"
-          >
-            Create beautiful digital requests that will make the moment memorable and captured.
-          </motion.p>
-          <motion.div className="animate-text">
-            <Link href="/scenarios" className="inline-block">
-              <motion.button
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold text-lg shadow-lg transition-all duration-300"
-                whileHover={{ scale: 1.05, boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Start Creating
-              </motion.button>
-            </Link>
-          </motion.div>
+          <Link href="/scenarios" passHref>
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-8 py-4 rounded-full text-lg font-semibold ${
+                theme === 'dark'
+                  ? 'bg-white text-gray-900 hover:bg-gray-100'
+                  : 'bg-pink-500 text-white hover:bg-pink-600'
+              } transform transition-all duration-200 ease-in-out`}
+            >
+              Get Started
+            </motion.a>
+          </Link>
         </motion.div>
-
-        <motion.div
-          className="absolute bottom-8 z-10"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <FiArrowDown className="text-4xl text-gray-600 dark:text-gray-400" />
-        </motion.div>
-      </div>
+      </motion.div>
 
       {/* Features Section */}
       <div ref={featuresRef} className="relative z-10 py-24 px-4">
@@ -153,6 +160,7 @@ export default function Home() {
           {features.map((feature, index) => (
             <motion.div
               key={index}
+              variants={itemVariants}
               className="feature-card group"
               whileHover={{ y: -10 }}
             >

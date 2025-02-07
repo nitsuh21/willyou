@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
 import Head from 'next/head';
 import { FiMail, FiHeart } from 'react-icons/fi';
-import { useRouter } from 'next/router';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function GalleryPage() {
-  const router = useRouter();
-  const theme = router.query.theme as string || 'light';
+  const { theme } = useTheme();
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-pink-50'}`}>

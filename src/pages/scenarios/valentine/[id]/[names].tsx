@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '../../../../context/ThemeContext';
 import Head from 'next/head';
 import { FiHeart, FiShare2, FiGift } from 'react-icons/fi';
 import confetti from 'canvas-confetti';
-import { MusicPlayer } from '@/components/MusicPlayer';
+import { MusicPlayer } from '../../../../components/MusicPlayer';
 
 export default function ValentinePage() {
   const router = useRouter();

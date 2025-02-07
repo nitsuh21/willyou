@@ -1,62 +1,15 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/context/ThemeContext';
 
-const scenarios = [
-  {
-    id: 'valentine',
-    title: 'Will You Be My Valentine?',
-    description: 'Create a magical Valentine\'s proposal',
-    image: '/images/scenarios/valentine.jpg',
-    gradient: 'from-red-500 to-pink-500',
-  },
-  {
-    id: 'proposal',
-    title: 'Will You Marry Me?',
-    description: 'Pop the question in a unique way',
-    image: '/images/scenarios/proposal.jpg',
-    gradient: 'from-pink-500 to-rose-500',
-  },
-  {
-    id: 'prom',
-    title: 'Will You Go To Prom?',
-    description: 'Make your prom invitation special',
-    image: '/images/scenarios/prom.jpg',
-    gradient: 'from-purple-500 to-indigo-500',
-  },
-  {
-    id: 'date',
-    title: 'Will You Go On A Date?',
-    description: 'Ask them out in style',
-    image: '/images/scenarios/date.jpg',
-    gradient: 'from-orange-500 to-yellow-500',
-  },
-  {
-    id: 'anniversary',
-    title: 'Will You Celebrate With Me?',
-    description: 'Make your anniversary memorable',
-    image: '/images/scenarios/anniversary.jpg',
-    gradient: 'from-purple-500 to-indigo-500',
-  },
-  {
-    id: 'custom',
-    title: 'Custom Will You...?',
-    description: 'Create your own special request',
-    image: '/images/scenarios/custom.jpg',
-    gradient: 'from-pink-500 to-purple-500',
-  },
-];
-
 export default function ScenariosPage() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
-  const [selectedType, setSelectedType] = useState('');
-  const feedbackEmail = 'feedback@willyou.love';
+  const [selectedType, setSelectedType] = useState<string | null>(null);
 
   const handleCardClick = (type: string) => {
     if (type === 'valentine') {
@@ -67,10 +20,25 @@ export default function ScenariosPage() {
     }
   };
 
-  const handleShareFeedback = () => {
-    const subject = `Idea for ${selectedType} card`;
-    const body = `Hi! I have some ideas for the ${selectedType} card:\n\n`;
-    window.location.href = `mailto:${feedbackEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Valentine\'s Message',
+          text: 'Create your own Valentine\'s message!',
+          url: window.location.href
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+      }
+    }
   };
 
   return (
@@ -88,35 +56,6 @@ export default function ScenariosPage() {
       >
         {theme === 'dark' ? '🌞' : '🌙'}
       </motion.button>
-
-      {/* Floating hearts background */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-pink-100"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              scale: Math.random() * 0.5 + 0.5,
-              rotate: Math.random() * 360
-            }}
-            animate={{
-              y: [null, '-50px', '50px'],
-              rotate: [null, '10deg', '-10deg']
-            }}
-            transition={{
-              duration: Math.random() * 3 + 2,
-              repeat: Infinity,
-              repeatType: 'reverse',
-              ease: 'easeInOut',
-              delay: Math.random() * 2
-            }}
-          >
-            ❤️
-          </motion.div>
-        ))}
-      </div>
 
       <div className="container mx-auto px-4 py-16 relative">
         <div className="text-center mb-16">
@@ -137,144 +76,76 @@ export default function ScenariosPage() {
           </motion.p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Valentine Card */}
-          <motion.button
-            onClick={() => handleCardClick('valentine')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className={`group relative ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700'
-                : 'bg-white/10 border-white/20'
-            } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border`}
-          >
-            <div className="aspect-w-16 aspect-h-9">
-              <div className="p-8 flex flex-col items-center justify-center space-y-4">
-                <div className="text-6xl transform group-hover:scale-110 transition-transform">❤️</div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Will You Be My Valentine?</h3>
-                <p className="text-gray-600 dark:text-gray-300">Create a magical Valentine's proposal</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {[
+            {
+              id: 'valentine',
+              title: 'Will You Be My Valentine?',
+              description: 'Create a magical Valentine\'s proposal',
+              icon: '❤️'
+            },
+            {
+              id: 'proposal',
+              title: 'Will You Marry Me?',
+              description: 'Pop the question in a unique way',
+              icon: '💍'
+            },
+            {
+              id: 'prom',
+              title: 'Will You Go To Prom?',
+              description: 'Make your prom invitation special',
+              icon: '🎭'
+            },
+            {
+              id: 'date',
+              title: 'Will You Go On A Date?',
+              description: 'Ask them out in style',
+              icon: '🌹'
+            },
+            {
+              id: 'anniversary',
+              title: 'Will You Celebrate With Me?',
+              description: 'Make your anniversary memorable',
+              icon: '🎊'
+            },
+            {
+              id: 'custom',
+              title: 'Custom Will You...?',
+              description: 'Create your own special request',
+              icon: '✨'
+            }
+          ].map((card) => (
+            <motion.button
+              key={card.id}
+              onClick={() => handleCardClick(card.id)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * Math.random() }}
+              className={`group relative ${
+                theme === 'dark'
+                  ? 'bg-gray-800/50 border-gray-700'
+                  : 'bg-white/10 border-white/20'
+              } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border w-full`}
+            >
+              <div className="aspect-w-16 aspect-h-9 p-8">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="text-6xl transform group-hover:scale-110 transition-transform">
+                    {card.icon}
+                  </div>
+                  <h3 className={`text-2xl font-bold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {card.title}
+                  </h3>
+                  <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                    {card.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          </motion.button>
-
-          {/* Marriage Proposal Card */}
-          <motion.button
-            onClick={() => handleCardClick('proposal')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className={`group relative ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700'
-                : 'bg-white/10 border-white/20'
-            } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border`}
-          >
-            <div className="aspect-w-16 aspect-h-9">
-              <div className="p-8 flex flex-col items-center justify-center space-y-4">
-                <div className="text-6xl transform group-hover:scale-110 transition-transform">💍</div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Will You Marry Me?</h3>
-                <p className="text-gray-600 dark:text-gray-300">Pop the question in a unique way</p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Prom Proposal Card */}
-          <motion.button
-            onClick={() => handleCardClick('prom')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className={`group relative ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700'
-                : 'bg-white/10 border-white/20'
-            } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border`}
-          >
-            <div className="aspect-w-16 aspect-h-9">
-              <div className="p-8 flex flex-col items-center justify-center space-y-4">
-                <div className="text-6xl transform group-hover:scale-110 transition-transform">🎭</div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Will You Go To Prom?</h3>
-                <p className="text-gray-600 dark:text-gray-300">Make your prom invitation special</p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Date Proposal Card */}
-          <motion.button
-            onClick={() => handleCardClick('date')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className={`group relative ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700'
-                : 'bg-white/10 border-white/20'
-            } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border`}
-          >
-            <div className="aspect-w-16 aspect-h-9">
-              <div className="p-8 flex flex-col items-center justify-center space-y-4">
-                <div className="text-6xl transform group-hover:scale-110 transition-transform">🌹</div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Will You Go On A Date?</h3>
-                <p className="text-gray-600 dark:text-gray-300">Ask them out in style</p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Anniversary Card */}
-          <motion.button
-            onClick={() => handleCardClick('anniversary')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className={`group relative ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700'
-                : 'bg-white/10 border-white/20'
-            } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border`}
-          >
-            <div className="aspect-w-16 aspect-h-9">
-              <div className="p-8 flex flex-col items-center justify-center space-y-4">
-                <div className="text-6xl transform group-hover:scale-110 transition-transform">🎊</div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Will You Celebrate With Me?</h3>
-                <p className="text-gray-600 dark:text-gray-300">Make your anniversary memorable</p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Custom Card */}
-          <motion.button
-            onClick={() => handleCardClick('custom')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className={`group relative ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700'
-                : 'bg-white/10 border-white/20'
-            } backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border`}
-          >
-            <div className="aspect-w-16 aspect-h-9">
-              <div className="p-8 flex flex-col items-center justify-center space-y-4">
-                <div className="text-6xl transform group-hover:scale-110 transition-transform">✨</div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Custom Will You...?</h3>
-                <p className="text-gray-600 dark:text-gray-300">Create your own special request</p>
-              </div>
-            </div>
-          </motion.button>
+            </motion.button>
+          ))}
         </div>
       </div>
 
@@ -305,10 +176,10 @@ export default function ScenariosPage() {
                  selectedType === 'date' ? '🌹' :
                  selectedType === 'anniversary' ? '🎊' : '✨'}
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              <h3 className="text-2xl font-bold">
                 Coming Soon!
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
                 We're working hard to make the perfect {selectedType} card. Would you like to share your ideas with us?
               </p>
               <div className="flex justify-center space-x-4">
