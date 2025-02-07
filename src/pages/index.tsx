@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import Link from 'next/link';
 import { useTheme } from '../context/ThemeContext';
 import { FiMoon, FiSun, FiHeart, FiGift, FiCamera, FiArrowDown, FiMusic } from 'react-icons/fi';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 const features = [
   {
@@ -32,9 +32,18 @@ const features = [
 ];
 
 export default function Home() {
-  const { theme, toggleTheme } = useTheme()
-  const featuresRef = useRef<HTMLDivElement>(null)
+  const { theme, toggleTheme } = useTheme();
+  const featuresRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
+  const [hearts, setHearts] = useState<Array<{ x: number; y: number; scale: number }>>([]);
+
+  useEffect(() => {
+    setHearts(Array.from({ length: 20 }).map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      scale: Math.random() * 0.5 + 0.5
+    })));
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -90,13 +99,13 @@ export default function Home() {
       </motion.button>
 
       {/* Floating Hearts */}
-      {Array.from({ length: 20 }).map((_, i) => (
+      {hearts.map((heart, i) => (
         <motion.div
           key={i}
           initial={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-            scale: Math.random() * 0.5 + 0.5,
+            x: heart.x,
+            y: heart.y,
+            scale: heart.scale,
             opacity: 0.6
           }}
           animate="float"
@@ -138,19 +147,35 @@ export default function Home() {
           variants={itemVariants}
           className="flex flex-col sm:flex-row gap-4"
         >
-          <Link href="/scenarios" passHref>
-            <motion.a
+          <Link href="/scenarios" className={`px-8 py-4 rounded-full text-lg font-semibold ${
+            theme === 'dark'
+              ? 'bg-white text-gray-900 hover:bg-gray-100'
+              : 'bg-pink-500 text-white hover:bg-pink-600'
+          } transform transition-all duration-200 ease-in-out`}>
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`px-8 py-4 rounded-full text-lg font-semibold ${
-                theme === 'dark'
-                  ? 'bg-white text-gray-900 hover:bg-gray-100'
-                  : 'bg-pink-500 text-white hover:bg-pink-600'
-              } transform transition-all duration-200 ease-in-out`}
             >
               Get Started
-            </motion.a>
+            </motion.div>
           </Link>
+
+          <motion.button
+            onClick={() => {
+              if (featuresRef.current) {
+                featuresRef.current.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`px-8 py-4 rounded-full text-lg font-semibold flex items-center gap-2 ${
+              theme === 'dark'
+                ? 'bg-gray-800 text-white hover:bg-gray-700'
+                : 'bg-white text-gray-900 hover:bg-gray-50'
+            } transform transition-all duration-200 ease-in-out`}
+          >
+            Learn More <FiArrowDown />
+          </motion.button>
         </motion.div>
       </motion.div>
 
