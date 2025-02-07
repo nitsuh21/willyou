@@ -156,26 +156,39 @@ export default function ValentinePage() {
   );
 
   // Flower animation component
-  const FloatingFlower = ({ emoji, delay = 0 }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 100, x: Math.random() * window.innerWidth }}
-      animate={{
-        opacity: [0, 1, 1, 0],
-        y: -100,
-        x: Math.random() * 100 - 50,
-        rotate: Math.random() * 360
-      }}
-      transition={{
-        duration: 5,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-      className="absolute text-2xl pointer-events-none"
-    >
-      {emoji}
-    </motion.div>
-  );
+  interface FloatingFlowerProps {
+    emoji: string;
+    delay?: number;
+  }
+
+  const FloatingFlower = ({ emoji, delay = 0 }: FloatingFlowerProps) => {
+    const [randomX, setRandomX] = useState(0);
+
+    useEffect(() => {
+      setRandomX(Math.random() * window.innerWidth);
+    }, []);
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 100, x: randomX }}
+        animate={{
+          opacity: [0, 1, 1, 0],
+          y: -100,
+          x: Math.random() * 100 - 50,
+          rotate: Math.random() * 360
+        }}
+        transition={{
+          duration: 5,
+          delay,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className="absolute text-2xl pointer-events-none"
+      >
+        {emoji}
+      </motion.div>
+    );
+  };
 
   // Flower emojis for animation
   const flowers = ['🌸', '🌺', '🌹', '🌷', '💐', '🌻'];

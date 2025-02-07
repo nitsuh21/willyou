@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/router';
 import gsap from 'gsap';
-import { EnhancedAvatar } from '../../../components/EnhancedAvatar';
 import { styles } from '../../../utils/styles';
-import { animations } from '../../../utils/animations';
 import { Loading } from '../../../components/shared/Loading';
 import type { AvatarStyle } from '../../../types/scenarios';
 
@@ -234,22 +232,8 @@ export default function Customize() {
                     exit={{ opacity: 0 }}
                     className="w-full h-full"
                   >
-                    <EnhancedAvatar
-                      gender="male"
-                      position={{ x: 100, y: 200 }}
-                      style={askerStyle}
-                      animation={{
-                        type: 'entrance',
-                      }}
-                    />
-                    <EnhancedAvatar
-                      gender="female"
-                      position={{ x: 300, y: 200 }}
-                      style={receiverStyle}
-                      animation={{
-                        type: 'entrance',
-                      }}
-                    />
+                    
+                    
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -350,8 +334,6 @@ export default function Customize() {
             className="mt-12 text-center"
           >
             <motion.button
-              whileHover={animations.buttonHover}
-              whileTap={animations.buttonTap}
               onClick={() => router.push(`/scenarios/${id}/preview`)}
               className={`${styles.button.base} ${styles.button.primary} text-lg`}
             >
