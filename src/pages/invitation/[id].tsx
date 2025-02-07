@@ -1,8 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import Scene3D from '../../components/Scene3D';
+import dynamic from 'next/dynamic';
 import { Invitation } from '../../types';
+
+// Import Scene3D with no SSR
+const Scene3D = dynamic(() => import('../../components/Scene3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[500px] flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+      <div className="text-lg">Loading 3D Scene...</div>
+    </div>
+  ),
+});
 
 // This is a temporary mock function - replace with actual API call
 const fetchInvitation = async (id: string): Promise<Invitation> => {
@@ -53,24 +63,33 @@ export default function InvitationPreview() {
 
   useEffect(() => {
     if (id) {
-      // Fetch invitation data from your API
       fetchInvitation(id as string).then(setInvitation);
     }
   }, [id]);
 
   if (!invitation) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-xl">Loading invitation...</div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-slate-900">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <Scene3D
-            scene={invitation.scene}
-            character={invitation.sender}
-            animation={playing ? 'propose' : 'idle'}
-          />
+          <Suspense fallback={
+            <div className="w-full h-[500px] flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+              <div className="text-lg">Loading 3D Scene...</div>
+            </div>
+          }>
+            <Scene3D
+              scene={String(invitation.scene)}
+              character={invitation.sender}
+              animation={playing ? 'propose' : 'idle'}
+            />
+          </Suspense>
           
           <div className="mt-8 text-center">
             <h2 className="text-3xl font-bold mb-4">
@@ -92,4 +111,4 @@ export default function InvitationPreview() {
       </div>
     </div>
   );
-} 
+}
