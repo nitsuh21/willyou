@@ -21,6 +21,7 @@ export default function ValentinePage() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [response, setResponse] = useState<'yes' | 'no' | null>(null);
   const [openedGifts, setOpenedGifts] = useState<string[]>([]);
+  const [requestData, setRequestData] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,6 +57,20 @@ export default function ValentinePage() {
       return () => clearInterval(interval);
     }
   }, []);
+
+  useEffect(() => {
+    // Load existing request data if available
+    if (id) {
+      fetch(`/api/requests/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.response) {
+            setResponse(data.response);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [id]);
 
   const giftOptions = [
     { id: 'chocolate', emoji: '🍫', title: 'Box of Chocolates', message: 'Sweet treats for my sweet!' },
@@ -107,13 +122,8 @@ export default function ValentinePage() {
     }
   };
 
-  const handleYesClick = () => {
-    setResponse('yes');
-    confetti({
-      particleCount: 150,
-      spread: 180,
-      origin: { y: 0.8 }
-    });
+  const handleYesClick = async () => {
+    await handleResponse('yes');
   };
 
   const handleFinalNo = () => {
@@ -122,6 +132,34 @@ export default function ValentinePage() {
     }, 3000);
     setResponse('no');
     setShowConfirmDialog(false);
+  };
+
+  const handleResponse = async (answer: 'yes' | 'no') => {
+    try {
+      setResponse(answer);
+      if (answer === 'yes') {
+        // Trigger existing confetti animation
+        confetti({
+          particleCount: 150,
+          spread: 180,
+          origin: { y: 0.8 }
+        });
+      } else {
+        setNoCount(prev => prev + 1);
+      }
+
+      if (id) {
+        await fetch(`/api/requests/response?id=${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ response: answer })
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update response:', error);
+    }
   };
 
   const FloatingHearts = () => (

@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Request {
+  id            String    @id @default(uuid())
+  type          String    
+  senderName    String    @map("sender_name")
+  receiverName  String    @map("receiver_name")
+  customMessage String?   @map("custom_message")
+  music         String?
+  gifts         String[]
+  theme         String?
+  response      String?
+  respondedAt   DateTime? @map("responded_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("requests")
+}
