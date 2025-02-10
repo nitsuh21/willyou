@@ -89,14 +89,14 @@ export default function Home() {
         : 'bg-gradient-to-br from-pink-100 via-red-100 to-purple-100'
     } relative overflow-hidden`}>
       {/* Theme Toggle Button */}
-      <motion.button
+      {/* <motion.button
         onClick={toggleTheme}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         className="fixed top-4 right-4 z-50 p-3 rounded-full bg-white/10 backdrop-blur-lg border border-white/20"
       >
         {theme === 'dark' ? <FiMoon size={24} /> : <FiSun size={24} />}
-      </motion.button>
+      </motion.button> */}
 
       {/* Floating Hearts */}
       {hearts.map((heart, i) => (

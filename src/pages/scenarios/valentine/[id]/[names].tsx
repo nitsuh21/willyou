@@ -229,7 +229,7 @@ export default function ValentinePage() {
         whileTap={{ scale: 0.9 }}
         className="fixed top-4 right-4 z-50 p-3 rounded-full bg-white/10 backdrop-blur-lg hover:bg-white/20 text-pink-500 dark:text-pink-400 shadow-lg"
       >
-        <FiShare2 className="w-6 h-6" />
+        {/* <FiShare2 className="w-6 h-6" /> */}
       </motion.button>
 
       <FloatingHearts />

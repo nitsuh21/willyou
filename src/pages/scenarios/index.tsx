@@ -48,14 +48,14 @@ export default function ScenariosPage() {
         : 'bg-gradient-to-br from-pink-100 via-red-100 to-purple-100'
     } relative overflow-hidden`}>
       {/* Theme Toggle Button */}
-      <motion.button
+      {/* <motion.button
         onClick={toggleTheme}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className="fixed top-4 right-4 z-50 p-3 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg"
       >
         {theme === 'dark' ? '🌞' : '🌙'}
-      </motion.button>
+      </motion.button> */}
 
       <div className="container mx-auto px-4 py-16 relative">
         <div className="text-center mb-16">
